@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Home, Sparkles } from "lucide-react";
+import { BookOpen, Home, Sparkles, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navigation = () => {
@@ -38,6 +38,17 @@ const Navigation = () => {
               <Link to="/stories" className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
                 <span className="hidden sm:inline">Stories</span>
+              </Link>
+            </Button>
+
+            <Button
+              variant={isActive("/research") ? "default" : "ghost"}
+              size="sm"
+              asChild
+            >
+              <Link to="/research" className="flex items-center gap-2">
+                <FlaskConical className="w-4 h-4" />
+                <span className="hidden sm:inline">Research</span>
               </Link>
             </Button>
 
