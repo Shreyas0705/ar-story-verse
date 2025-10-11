@@ -126,9 +126,10 @@ const AR = () => {
             <div className="relative rounded-3xl overflow-hidden border border-border animate-fade-in" style={{ height: '70vh' }}>
               <a-scene
                 embedded
-                arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+                arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; videoTexture: true;"
                 vr-mode-ui="enabled: false"
-                renderer="logarithmicDepthBuffer: true;"
+                renderer="logarithmicDepthBuffer: true; alpha: true; antialias: true;"
+                style={{ width: '100%', height: '100%' }}
               >
                 {/* Lighting */}
                 <a-light type="ambient" color="#ffffff" intensity="0.5"></a-light>
