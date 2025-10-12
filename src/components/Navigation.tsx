@@ -1,9 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Home, Sparkles, FlaskConical } from "lucide-react";
+import { BookOpen, Home, Sparkles, FlaskConical, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Navigation = () => {
   const location = useLocation();
+  const { language, toggleLanguage, t } = useLanguage();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -14,7 +16,7 @@ const Navigation = () => {
           <Link to="/" className="flex items-center gap-2 group">
             <Sparkles className="w-6 h-6 text-primary group-hover:animate-glow" />
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              AR Storytelling
+              {t("nav.brandName")}
             </span>
           </Link>
 
@@ -26,7 +28,7 @@ const Navigation = () => {
             >
               <Link to="/" className="flex items-center gap-2">
                 <Home className="w-4 h-4" />
-                <span className="hidden sm:inline">Home</span>
+                <span className="hidden sm:inline">{t("nav.home")}</span>
               </Link>
             </Button>
 
@@ -37,7 +39,7 @@ const Navigation = () => {
             >
               <Link to="/stories" className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
-                <span className="hidden sm:inline">Stories</span>
+                <span className="hidden sm:inline">{t("nav.stories")}</span>
               </Link>
             </Button>
 
@@ -48,7 +50,7 @@ const Navigation = () => {
             >
               <Link to="/research" className="flex items-center gap-2">
                 <FlaskConical className="w-4 h-4" />
-                <span className="hidden sm:inline">Research</span>
+                <span className="hidden sm:inline">{t("nav.research")}</span>
               </Link>
             </Button>
 
@@ -60,8 +62,18 @@ const Navigation = () => {
             >
               <Link to="/ar" className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
-                <span className="hidden sm:inline">AR Demo</span>
+                <span className="hidden sm:inline">{t("nav.arDemo")}</span>
               </Link>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleLanguage}
+              className="ml-2"
+            >
+              <Languages className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{language === "en" ? "हिं" : "EN"}</span>
             </Button>
           </div>
         </div>

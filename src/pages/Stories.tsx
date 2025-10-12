@@ -2,35 +2,37 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import farmerImage from "@/assets/story-farmer.jpg";
 import treeImage from "@/assets/story-tree.jpg";
 import planetImage from "@/assets/story-planet.jpg";
 
-const stories = [
-  {
-    id: 1,
-    title: "The Brave Farmer",
-    description: "Follow the journey of a courageous farmer who protects his village from mysterious forces. Experience his determination and bravery in AR.",
-    image: farmerImage,
-    color: "from-amber-500/20 to-orange-500/20",
-  },
-  {
-    id: 2,
-    title: "The Talking Tree",
-    description: "Discover the ancient wisdom of a magical tree that shares stories of the forest. Watch it come alive with glowing leaves and enchanting tales.",
-    image: treeImage,
-    color: "from-green-500/20 to-emerald-500/20",
-  },
-  {
-    id: 3,
-    title: "The Lost Planet",
-    description: "Explore an alien world with floating islands and strange vegetation. Journey through space and uncover the mysteries of this distant realm.",
-    image: planetImage,
-    color: "from-purple-500/20 to-blue-500/20",
-  },
-];
-
 const Stories = () => {
+  const { t } = useLanguage();
+  
+  const stories = [
+    {
+      id: 1,
+      titleKey: "stories.braveFarmer",
+      descKey: "stories.braveFarmerDesc",
+      image: farmerImage,
+      color: "from-amber-500/20 to-orange-500/20",
+    },
+    {
+      id: 2,
+      titleKey: "stories.talkingTree",
+      descKey: "stories.talkingTreeDesc",
+      image: treeImage,
+      color: "from-green-500/20 to-emerald-500/20",
+    },
+    {
+      id: 3,
+      titleKey: "stories.lostPlanet",
+      descKey: "stories.lostPlanetDesc",
+      image: planetImage,
+      color: "from-purple-500/20 to-blue-500/20",
+    },
+  ];
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -39,19 +41,18 @@ const Stories = () => {
         {/* Header */}
         <div className="max-w-3xl mx-auto text-center mb-16 animate-fade-in">
           <div className="inline-block mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-            <span className="text-sm font-medium text-primary">Story Collection</span>
+            <span className="text-sm font-medium text-primary">{t("stories.collection")}</span>
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Choose Your{" "}
+            {t("stories.chooseYour")}{" "}
             <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              AR Adventure
+              {t("stories.arAdventure")}
             </span>
           </h1>
           
           <p className="text-xl text-muted-foreground">
-            Select a story and experience it in augmented reality. 
-            Each tale offers a unique immersive journey.
+            {t("stories.subtitle")}
           </p>
         </div>
 
@@ -70,7 +71,7 @@ const Stories = () => {
               <div className="relative aspect-square overflow-hidden">
                 <img
                   src={story.image}
-                  alt={story.title}
+                  alt={t(story.titleKey)}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
@@ -79,11 +80,11 @@ const Stories = () => {
               {/* Content */}
               <div className="relative p-6 space-y-4">
                 <h2 className="text-2xl font-bold group-hover:text-primary transition-colors">
-                  {story.title}
+                  {t(story.titleKey)}
                 </h2>
                 
                 <p className="text-muted-foreground leading-relaxed">
-                  {story.description}
+                  {t(story.descKey)}
                 </p>
 
                 <Button
@@ -92,7 +93,7 @@ const Stories = () => {
                 >
                   <Link to="/ar" className="flex items-center justify-center gap-2">
                     <Sparkles className="w-4 h-4" />
-                    View in AR
+                    {t("stories.viewInAr")}
                   </Link>
                 </Button>
               </div>
@@ -107,9 +108,9 @@ const Stories = () => {
 
         {/* Call to Action */}
         <div className="max-w-2xl mx-auto text-center mt-20 p-8 rounded-3xl bg-gradient-to-br from-card to-card/50 border border-border">
-          <h2 className="text-3xl font-bold mb-4">Ready to Experience AR?</h2>
+          <h2 className="text-3xl font-bold mb-4">{t("stories.readyToExperience")}</h2>
           <p className="text-muted-foreground mb-6">
-            Jump right into our AR demo and see the magic for yourself
+            {t("stories.jumpIntoDemo")}
           </p>
           <Button
             size="lg"
@@ -118,7 +119,7 @@ const Stories = () => {
           >
             <Link to="/ar" className="flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
-              Launch AR Demo
+              {t("stories.launchArDemo")}
             </Link>
           </Button>
         </div>

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Home, Volume2, VolumeX, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 declare global {
   namespace JSX {
@@ -22,6 +23,7 @@ declare global {
 }
 
 const AR = () => {
+  const { t } = useLanguage();
   const [isAframeLoaded, setIsAframeLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -92,14 +94,14 @@ const AR = () => {
             >
               <Link to="/" className="flex items-center gap-2">
                 <Home className="w-4 h-4" />
-                <span className="hidden sm:inline">Back Home</span>
+                <span className="hidden sm:inline">{t("ar.backHome")}</span>
               </Link>
             </Button>
 
             <div className="flex items-center gap-2">
               <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
                 <Info className="w-4 h-4 text-primary" />
-                <span className="text-sm text-primary">Move your device to explore</span>
+                <span className="text-sm text-primary">{t("ar.moveDevice")}</span>
               </div>
 
               <Button
@@ -120,7 +122,7 @@ const AR = () => {
           {!isAframeLoaded ? (
             <div className="flex flex-col items-center justify-center min-h-[600px] bg-card/50 backdrop-blur-sm border border-border rounded-3xl animate-fade-in">
               <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
-              <p className="text-lg text-muted-foreground">Loading AR Experience...</p>
+              <p className="text-lg text-muted-foreground">{t("ar.loadingAr")}</p>
             </div>
           ) : (
             <div className="relative rounded-3xl overflow-hidden border border-border animate-fade-in" style={{ height: '70vh' }}>
@@ -201,16 +203,16 @@ const AR = () => {
           {/* Instructions */}
           <div className="mt-8 grid md:grid-cols-2 gap-6">
             <div className="p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border">
-              <h3 className="text-xl font-bold mb-3 text-primary">🎯 With Marker</h3>
+              <h3 className="text-xl font-bold mb-3 text-primary">{t("ar.withMarker")}</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Print or display the <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank" rel="noopener noreferrer" className="text-secondary underline">Hiro marker</a> and point your camera at it to see a magical AR tree appear!
+                {t("ar.markerDesc")}
               </p>
             </div>
 
             <div className="p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border">
-              <h3 className="text-xl font-bold mb-3 text-accent">✨ Markerless</h3>
+              <h3 className="text-xl font-bold mb-3 text-accent">{t("ar.markerless")}</h3>
               <p className="text-muted-foreground leading-relaxed">
-                No marker? No problem! You'll see a rotating cube in front of you. Move your device to explore the 3D space.
+                {t("ar.markerlessDesc")}
               </p>
             </div>
           </div>

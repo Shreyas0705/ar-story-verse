@@ -1,8 +1,11 @@
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, Users, TrendingUp, Award } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Research = () => {
+  const { t } = useLanguage();
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <Navigation />
@@ -11,10 +14,10 @@ const Research = () => {
       <section className="pt-32 pb-16 px-4">
         <div className="container mx-auto max-w-6xl text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-fade-in">
-            Our Research
+            {t("research.title")}
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto animate-fade-in">
-            Exploring the impact of augmented reality on reading engagement, comprehension, and cognitive development.
+            {t("research.subtitle")}
           </p>
         </div>
       </section>
@@ -22,32 +25,32 @@ const Research = () => {
       {/* Our Approach */}
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold mb-12 text-center">Our Approach</h2>
+          <h2 className="text-4xl font-bold mb-12 text-center">{t("research.ourApproach")}</h2>
           
           <Card className="mb-8 animate-fade-in hover:shadow-xl transition-all duration-300">
             <CardHeader>
-              <CardTitle className="text-2xl">Research Methodology</CardTitle>
+              <CardTitle className="text-2xl">{t("research.methodology")}</CardTitle>
               <CardDescription className="text-base">
-                Our research combines quantitative and qualitative methods to understand how AR technology impacts reading behaviors and outcomes among youth aged 10-25. We partner with educational institutions, libraries, and literacy organizations to conduct controlled studies and gather real-world data.
+                {t("research.methodologyDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3 text-muted-foreground">
                 <li className="flex items-start gap-3">
                   <span className="text-primary mt-1">•</span>
-                  <span>Longitudinal studies tracking reading habits over time</span>
+                  <span>{t("research.longitudinal")}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-primary mt-1">•</span>
-                  <span>Comparative analysis between traditional and AR-enhanced reading</span>
+                  <span>{t("research.comparative")}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-primary mt-1">•</span>
-                  <span>Cognitive assessment to measure comprehension and retention</span>
+                  <span>{t("research.cognitive")}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-primary mt-1">•</span>
-                  <span>User experience surveys and feedback collection</span>
+                  <span>{t("research.userExperience")}</span>
                 </li>
               </ul>
             </CardContent>
@@ -58,13 +61,13 @@ const Research = () => {
       {/* Key Findings */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold mb-12 text-center">Key Findings</h2>
+          <h2 className="text-4xl font-bold mb-12 text-center">{t("research.keyFindings")}</h2>
           
           <Card className="mb-8 animate-fade-in hover:shadow-xl transition-all duration-300">
             <CardHeader>
-              <CardTitle className="text-2xl">Research Outcomes</CardTitle>
+              <CardTitle className="text-2xl">{t("research.outcomes")}</CardTitle>
               <CardDescription className="text-base">
-                Our preliminary research has yielded promising results that support the effectiveness of AR-enhanced reading experiences in increasing engagement and improving comprehension among young readers.
+                {t("research.outcomesDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -72,29 +75,29 @@ const Research = () => {
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
                   <TrendingUp className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-foreground">67% increase</p>
-                    <p className="text-sm text-muted-foreground">in voluntary reading time among test subjects</p>
+                    <p className="font-semibold text-foreground">{t("research.increase67")}</p>
+                    <p className="text-sm text-muted-foreground">{t("research.increase67Desc")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
                   <BookOpen className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-foreground">42% improvement</p>
-                    <p className="text-sm text-muted-foreground">in story comprehension and retention</p>
+                    <p className="font-semibold text-foreground">{t("research.improvement42")}</p>
+                    <p className="text-sm text-muted-foreground">{t("research.improvement42Desc")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
                   <Award className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-foreground">89% of participants</p>
-                    <p className="text-sm text-muted-foreground">reported increased enjoyment of reading</p>
+                    <p className="font-semibold text-foreground">{t("research.participants89")}</p>
+                    <p className="text-sm text-muted-foreground">{t("research.participants89Desc")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
                   <Users className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-foreground">Significant improvements</p>
-                    <p className="text-sm text-muted-foreground">in vocabulary acquisition and retention</p>
+                    <p className="font-semibold text-foreground">{t("research.significant")}</p>
+                    <p className="text-sm text-muted-foreground">{t("research.significantDesc")}</p>
                   </div>
                 </div>
               </div>
@@ -220,12 +223,12 @@ const Research = () => {
       {/* Participate CTA */}
       <section className="py-16 px-4 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20">
         <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-4xl font-bold mb-6">Participate in Our Research</h2>
+          <h2 className="text-4xl font-bold mb-6">{t("research.participate")}</h2>
           <p className="text-xl text-muted-foreground mb-8">
-            We're always looking for schools, libraries, and individual readers to participate in our ongoing studies.
+            {t("research.participateDesc")}
           </p>
           <button className="bg-primary text-primary-foreground px-8 py-4 rounded-lg font-semibold hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl animate-glow">
-            Get Involved
+            {t("research.getInvolved")}
           </button>
         </div>
       </section>
@@ -234,9 +237,9 @@ const Research = () => {
       <footer className="py-12 px-4 border-t border-border">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center text-muted-foreground">
-            <p className="mb-4 font-semibold text-foreground">AR Storytelling Platform</p>
-            <p className="text-sm mb-4">Reviving the joy of reading among youth through immersive AR experiences and gamified storytelling.</p>
-            <p className="text-sm">© 2024 AR Storytelling. All rights reserved.</p>
+            <p className="mb-4 font-semibold text-foreground">{t("nav.brandName")}</p>
+            <p className="text-sm mb-4">{t("research.footerDesc")}</p>
+            <p className="text-sm">{t("research.copyright")}</p>
           </div>
         </div>
       </footer>
