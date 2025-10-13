@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, Volume2, VolumeX, Info, Sparkles } from "lucide-react";
+import { Home, Volume2, VolumeX, Info, Sparkles, Play, Pause } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -29,6 +29,7 @@ const AR = () => {
   const videoUrl = searchParams.get('video');
   const [isAframeLoaded, setIsAframeLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -79,6 +80,24 @@ const AR = () => {
       audioRef.current.muted = !audioRef.current.muted;
       setIsMuted(!isMuted);
     }
+    
+    // Also toggle video mute
+    const video = document.getElementById('video-asset') as HTMLVideoElement;
+    if (video) {
+      video.muted = !video.muted;
+    }
+  };
+
+  const togglePlayPause = () => {
+    const video = document.getElementById('video-asset') as HTMLVideoElement;
+    if (video) {
+      if (isPlaying) {
+        video.pause();
+      } else {
+        video.play().catch(console.error);
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
 
   return (
@@ -114,6 +133,27 @@ const AR = () => {
                 <Info className="w-4 h-4 text-primary" />
                 <span className="text-sm text-primary">{t("ar.moveDevice")}</span>
               </div>
+
+              {videoUrl && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={togglePlayPause}
+                  className="gap-2"
+                >
+                  {isPlaying ? (
+                    <>
+                      <Pause className="w-4 h-4" />
+                      <span className="hidden sm:inline">{t("ar.pause")}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4" />
+                      <span className="hidden sm:inline">{t("ar.play")}</span>
+                    </>
+                  )}
+                </Button>
+              )}
 
               <Button
                 variant="outline"
