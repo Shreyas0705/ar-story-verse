@@ -32,6 +32,14 @@ const Stories = () => {
       image: planetImage,
       color: "from-purple-500/20 to-blue-500/20",
     },
+    {
+      id: 4,
+      titleKey: "stories.lionAndMouse",
+      descKey: "stories.lionAndMouseDesc",
+      image: farmerImage, // Placeholder image
+      color: "from-yellow-500/20 to-amber-500/20",
+      video: "/videos/lion-and-mouse.mp4",
+    },
   ];
   return (
     <div className="min-h-screen bg-background">
@@ -91,7 +99,10 @@ const Stories = () => {
                   asChild
                   className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-[var(--shadow-glow)] transition-all duration-300"
                 >
-                  <Link to="/ar" className="flex items-center justify-center gap-2">
+                  <Link 
+                    to={story.video ? `/ar?video=${encodeURIComponent(story.video)}` : "/ar"} 
+                    className="flex items-center justify-center gap-2"
+                  >
                     <Sparkles className="w-4 h-4" />
                     {t("stories.viewInAr")}
                   </Link>

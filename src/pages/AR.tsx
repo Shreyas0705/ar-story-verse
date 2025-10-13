@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, Volume2, VolumeX, Info } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Home, Volume2, VolumeX, Info, Sparkles } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -24,6 +24,9 @@ declare global {
 
 const AR = () => {
   const { t } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoUrl = searchParams.get('video');
   const [isAframeLoaded, setIsAframeLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -116,10 +119,25 @@ const AR = () => {
         </div>
       </div>
 
-      {/* AR Scene */}
+      {/* Content */}
       <div className="pt-36 px-4 pb-8">
         <div className="container mx-auto">
-          {!isAframeLoaded ? (
+          {videoUrl ? (
+            /* Video Player */
+            <div className="max-w-4xl mx-auto">
+              <div className="relative aspect-video rounded-3xl overflow-hidden bg-gradient-to-br from-card to-card/50 border border-border shadow-lg animate-fade-in">
+                <video 
+                  ref={videoRef}
+                  className="w-full h-full object-contain bg-black"
+                  controls
+                  autoPlay
+                >
+                  <source src={videoUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+          ) : !isAframeLoaded ? (
             <div className="flex flex-col items-center justify-center min-h-[600px] bg-card/50 backdrop-blur-sm border border-border rounded-3xl animate-fade-in">
               <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
               <p className="text-lg text-muted-foreground">{t("ar.loadingAr")}</p>
@@ -200,8 +218,9 @@ const AR = () => {
             </div>
           )}
 
-          {/* Instructions */}
-          <div className="mt-8 grid md:grid-cols-2 gap-6">
+          {/* Instructions - Only show for AR, not video */}
+          {!videoUrl && (
+            <div className="mt-8 grid md:grid-cols-2 gap-6">
             <div className="p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border">
               <h3 className="text-xl font-bold mb-3 text-primary">{t("ar.withMarker")}</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -216,6 +235,7 @@ const AR = () => {
               </p>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>
