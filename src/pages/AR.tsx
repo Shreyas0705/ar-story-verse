@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, Volume2, VolumeX, Info, Sparkles, Play, Pause } from "lucide-react";
+import { Home, Volume2, VolumeX, Info, Sparkles, Play, Pause, Trophy } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import QuizModal from "@/components/quiz/QuizModal";
+import { getQuizByVideoUrl, getQuizByStoryId } from "@/data/quizData";
 
 declare global {
   namespace JSX {
@@ -30,7 +32,11 @@ const AR = () => {
   const [isAframeLoaded, setIsAframeLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [showQuiz, setShowQuiz] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Get quiz based on video URL or default to first story
+  const quiz = videoUrl ? getQuizByVideoUrl(videoUrl) : getQuizByStoryId(1);
 
   useEffect(() => {
     // Load A-Frame and AR.js
@@ -332,8 +338,42 @@ const AR = () => {
               </p>
             </div>
           </div>
+
+          {/* Quiz Call to Action */}
+          {quiz && (
+            <div className="mt-8 p-6 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 animate-fade-in">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-primary/20">
+                    <Trophy className="w-8 h-8 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">{t("ar.storyComplete")}</h3>
+                    <p className="text-muted-foreground">{t("ar.testKnowledge")}</p>
+                  </div>
+                </div>
+                <Button
+                  size="lg"
+                  onClick={() => setShowQuiz(true)}
+                  className="gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-[var(--shadow-glow)] transition-all duration-300"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  {t("ar.takeQuiz")}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Quiz Modal */}
+      {quiz && (
+        <QuizModal
+          quiz={quiz}
+          isOpen={showQuiz}
+          onClose={() => setShowQuiz(false)}
+        />
+      )}
     </div>
   );
 };
