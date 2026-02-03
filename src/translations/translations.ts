@@ -63,6 +63,9 @@ export const translations: Translations = {
       titleHighlight: "AR Stories",
       subtitle: "Point your camera at a surface or marker to see the story come alive in your surroundings.",
       demoPlaceholder: "AR experience will appear here",
+      takeQuiz: "Take Quiz",
+      storyComplete: "Story Complete!",
+      testKnowledge: "Test your knowledge with a quick quiz",
     },
     research: {
       title: "Our Research",
@@ -175,6 +178,9 @@ export const translations: Translations = {
       titleHighlight: "एआर कहानियाँ",
       subtitle: "अपने कैमरे को एक सतह या मार्कर पर इंगित करें ताकि कहानी आपके परिवेश में जीवंत हो जाए।",
       demoPlaceholder: "एआर अनुभव यहां दिखाई देगा",
+      takeQuiz: "प्रश्नोत्तरी लें",
+      storyComplete: "कहानी पूर्ण!",
+      testKnowledge: "एक त्वरित प्रश्नोत्तरी के साथ अपने ज्ञान का परीक्षण करें",
     },
     research: {
       title: "हमारा शोध",
