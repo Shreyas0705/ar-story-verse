@@ -39,31 +39,41 @@ const AR = () => {
   const quiz = videoUrl ? getQuizByVideoUrl(videoUrl) : getQuizByStoryId(1);
 
   useEffect(() => {
-    // Load A-Frame and AR.js
-    const aframeScript = document.createElement("script");
-    aframeScript.src = "https://aframe.io/releases/1.4.2/aframe.min.js";
-    aframeScript.async = true;
-    
-    const arScript = document.createElement("script");
-    arScript.src = "https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js";
-    arScript.async = true;
+    const loadScripts = async () => {
+      // Only load A-Frame if not already present
+      if (!(window as any).AFRAME) {
+        await new Promise<void>((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://aframe.io/releases/1.4.2/aframe.min.js";
+          script.onload = () => resolve();
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
 
-    aframeScript.onload = () => {
-      arScript.onload = () => {
-        setIsAframeLoaded(true);
-        
-        // Auto-play video when AR loads
-        setTimeout(() => {
-          const video = document.getElementById('ar-video') as HTMLVideoElement;
-          if (video) {
-            video.play().catch(console.error);
-          }
-        }, 1000);
-      };
-      document.body.appendChild(arScript);
+      // Only load AR.js if not already present
+      if (!(window as any).AFRAME?.components?.['arjs-anchor']) {
+        await new Promise<void>((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js";
+          script.onload = () => resolve();
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      setIsAframeLoaded(true);
+
+      // Auto-play video when AR loads
+      setTimeout(() => {
+        const video = document.getElementById('ar-video') as HTMLVideoElement;
+        if (video) {
+          video.play().catch(console.error);
+        }
+      }, 1000);
     };
 
-    document.body.appendChild(aframeScript);
+    loadScripts().catch(console.error);
 
     // Auto-play audio with user interaction
     const playAudio = () => {
@@ -76,8 +86,6 @@ const AR = () => {
 
     return () => {
       document.removeEventListener('click', playAudio);
-      if (aframeScript.parentNode) aframeScript.remove();
-      if (arScript.parentNode) arScript.remove();
     };
   }, []);
 
