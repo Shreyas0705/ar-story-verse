@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, Volume2, VolumeX, Info, Sparkles, Play, Pause, Trophy } from "lucide-react";
+import { Home, Volume2, VolumeX, Info, Sparkles, Play, Pause, Trophy, RotateCcw } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -114,6 +114,15 @@ const AR = () => {
     }
   };
 
+  const restartVideo = () => {
+    const video = document.getElementById('video-asset') as HTMLVideoElement;
+    if (video) {
+      video.currentTime = 0;
+      video.play().catch(console.error);
+      setIsPlaying(true);
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-background">
       <Navigation />
@@ -149,24 +158,35 @@ const AR = () => {
               </div>
 
               {videoUrl && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={togglePlayPause}
-                  className="gap-2"
-                >
-                  {isPlaying ? (
-                    <>
-                      <Pause className="w-4 h-4" />
-                      <span className="hidden sm:inline">{t("ar.pause")}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-4 h-4" />
-                      <span className="hidden sm:inline">{t("ar.play")}</span>
-                    </>
-                  )}
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={togglePlayPause}
+                    className="gap-2"
+                  >
+                    {isPlaying ? (
+                      <>
+                        <Pause className="w-4 h-4" />
+                        <span className="hidden sm:inline">{t("ar.pause")}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4" />
+                        <span className="hidden sm:inline">{t("ar.play")}</span>
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={restartVideo}
+                    className="gap-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t("ar.restart")}</span>
+                  </Button>
+                </>
               )}
 
               <Button
