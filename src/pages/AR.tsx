@@ -28,7 +28,7 @@ declare global {
 const AR = () => {
   const { t } = useLanguage();
   const [searchParams] = useSearchParams();
-  const videoUrl = searchParams.get('video');
+  const videoUrl = searchParams.get('video') || '/videos/brave-farmer.mp4';
   const [isAframeLoaded, setIsAframeLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
