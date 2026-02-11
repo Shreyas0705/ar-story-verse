@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import farmerImage from "@/assets/story-farmer.jpg";
 import treeImage from "@/assets/story-tree.jpg";
 import planetImage from "@/assets/story-planet.jpg";
+import lionMouseImage from "@/assets/story-lion-mouse.jpg";
 
 const Stories = () => {
   const { t } = useLanguage();
@@ -36,7 +37,7 @@ const Stories = () => {
       id: 4,
       titleKey: "stories.lionAndMouse",
       descKey: "stories.lionAndMouseDesc",
-      image: farmerImage, // Placeholder image
+      image: lionMouseImage,
       color: "from-yellow-500/20 to-amber-500/20",
       video: "/videos/lion-and-mouse.mp4",
     },
