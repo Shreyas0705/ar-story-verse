@@ -18,6 +18,7 @@ const Stories = () => {
       descKey: "stories.braveFarmerDesc",
       image: farmerImage,
       color: "from-amber-500/20 to-orange-500/20",
+      video: "/videos/brave-farmer.mp4",
     },
     {
       id: 2,
