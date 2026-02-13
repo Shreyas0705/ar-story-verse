@@ -211,17 +211,17 @@ const AR = () => {
                 {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </Button>
 
-              {isSupported && (
-                <Button
-                  variant={isListening ? "default" : "outline"}
-                  size="sm"
-                  onClick={toggleListening}
-                  className={`gap-2 ${isListening ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : ""}`}
-                >
-                  {isListening ? <Mic className="w-4 h-4 animate-pulse" /> : <MicOff className="w-4 h-4" />}
-                  <span className="hidden sm:inline">{isListening ? t("ar.voiceOn") : t("ar.voiceOff")}</span>
-                </Button>
-              )}
+              <Button
+                variant={isListening ? "default" : "outline"}
+                size="sm"
+                onClick={isSupported ? toggleListening : undefined}
+                disabled={!isSupported}
+                className={`gap-2 ${isListening ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : ""}`}
+                title={!isSupported ? "Voice commands not supported in this browser" : ""}
+              >
+                {isListening ? <Mic className="w-4 h-4 animate-pulse" /> : <MicOff className="w-4 h-4" />}
+                <span className="hidden sm:inline">{isListening ? t("ar.voiceOn") : t("ar.voiceOff")}</span>
+              </Button>
             </div>
 
             {/* Voice command feedback */}
