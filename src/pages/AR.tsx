@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, Volume2, VolumeX, Info, Sparkles, Play, Pause, Trophy, RotateCcw } from "lucide-react";
+import { Home, Volume2, VolumeX, Info, Sparkles, Play, Pause, Trophy, RotateCcw, Mic, MicOff } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import QuizModal from "@/components/quiz/QuizModal";
 import { getQuizByVideoUrl, getQuizByStoryId } from "@/data/quizData";
+import { useVoiceCommands } from "@/hooks/useVoiceCommands";
 
 declare global {
   namespace JSX {
@@ -26,7 +27,7 @@ declare global {
 }
 
 const AR = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [searchParams] = useSearchParams();
   const videoUrl = searchParams.get('video') || '/videos/brave-farmer.mp4';
   const [isAframeLoaded, setIsAframeLoaded] = useState(false);
@@ -34,6 +35,43 @@ const AR = () => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [showQuiz, setShowQuiz] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  const playVideo = useCallback(() => {
+    const video = document.getElementById('video-asset') as HTMLVideoElement;
+    if (video) { video.play().catch(console.error); setIsPlaying(true); }
+  }, []);
+
+  const pauseVideo = useCallback(() => {
+    const video = document.getElementById('video-asset') as HTMLVideoElement;
+    if (video) { video.pause(); setIsPlaying(false); }
+  }, []);
+
+  const restartVideo = useCallback(() => {
+    const video = document.getElementById('video-asset') as HTMLVideoElement;
+    if (video) { video.currentTime = 0; video.play().catch(console.error); setIsPlaying(true); }
+  }, []);
+
+  const muteAll = useCallback(() => {
+    if (audioRef.current) audioRef.current.muted = true;
+    const video = document.getElementById('video-asset') as HTMLVideoElement;
+    if (video) video.muted = true;
+    setIsMuted(true);
+  }, []);
+
+  const unmuteAll = useCallback(() => {
+    if (audioRef.current) audioRef.current.muted = false;
+    const video = document.getElementById('video-asset') as HTMLVideoElement;
+    if (video) video.muted = false;
+    setIsMuted(false);
+  }, []);
+
+  const { isListening, isSupported, lastCommand, toggleListening } = useVoiceCommands({
+    onPlay: playVideo,
+    onPause: pauseVideo,
+    onRestart: restartVideo,
+    onMute: muteAll,
+    onUnmute: unmuteAll,
+  }, language);
 
   // Get quiz based on video URL or default to first story
   const quiz = videoUrl ? getQuizByVideoUrl(videoUrl) : getQuizByStoryId(1);
@@ -90,37 +128,13 @@ const AR = () => {
   }, []);
 
   const toggleMute = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = !audioRef.current.muted;
-      setIsMuted(!isMuted);
-    }
-    
-    // Also toggle video mute
-    const video = document.getElementById('video-asset') as HTMLVideoElement;
-    if (video) {
-      video.muted = !video.muted;
-    }
+    if (isMuted) unmuteAll();
+    else muteAll();
   };
 
   const togglePlayPause = () => {
-    const video = document.getElementById('video-asset') as HTMLVideoElement;
-    if (video) {
-      if (isPlaying) {
-        video.pause();
-      } else {
-        video.play().catch(console.error);
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const restartVideo = () => {
-    const video = document.getElementById('video-asset') as HTMLVideoElement;
-    if (video) {
-      video.currentTime = 0;
-      video.play().catch(console.error);
-      setIsPlaying(true);
-    }
+    if (isPlaying) pauseVideo();
+    else playVideo();
   };
 
   return (
@@ -196,7 +210,34 @@ const AR = () => {
               >
                 {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </Button>
+
+              {isSupported && (
+                <Button
+                  variant={isListening ? "default" : "outline"}
+                  size="sm"
+                  onClick={toggleListening}
+                  className={`gap-2 ${isListening ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : ""}`}
+                >
+                  {isListening ? <Mic className="w-4 h-4 animate-pulse" /> : <MicOff className="w-4 h-4" />}
+                  <span className="hidden sm:inline">{isListening ? t("ar.voiceOn") : t("ar.voiceOff")}</span>
+                </Button>
+              )}
             </div>
+
+            {/* Voice command feedback */}
+            {lastCommand && (
+              <div className="mt-2 flex justify-end">
+                <span className="text-xs px-3 py-1 bg-primary/20 text-primary rounded-full animate-fade-in">
+                  🎤 "{lastCommand}"
+                </span>
+              </div>
+            )}
+
+            {isListening && (
+              <div className="mt-2 flex justify-end">
+                <span className="text-xs text-muted-foreground">{t("ar.sayCommands")}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
