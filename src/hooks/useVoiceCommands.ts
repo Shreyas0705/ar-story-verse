@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { toast } from "sonner";
 
 interface VoiceCommandHandlers {
   onPlay?: () => void;
@@ -103,11 +104,15 @@ export function useVoiceCommands(
       if (event.error === "not-allowed") {
         setIsListening(false);
         recognitionRef.current = null;
+        toast.error("🎤 Microphone permission denied. Please allow mic access.");
+      } else if (event.error !== "no-speech") {
+        toast.error("🎤 Voice recognition error: " + event.error);
       }
     };
 
     recognitionRef.current = recognition;
     recognition.start();
+    toast.success("🎤 Voice commands active — say Play, Pause, Restart, Mute, or Unmute");
     setIsListening(true);
   }, [isSupported, language, processTranscript]);
 
@@ -117,6 +122,7 @@ export function useVoiceCommands(
       recognitionRef.current = null;
       ref.stop();
       setIsListening(false);
+      toast.info("🎤 Voice commands stopped");
     }
   }, []);
 
