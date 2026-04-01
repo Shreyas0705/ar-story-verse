@@ -23,12 +23,14 @@ const COMMANDS_EN: Record<string, string> = {
   start: "play",
   resume: "play",
   pause: "pause",
+  paws: "pause",
   stop: "pause",
   restart: "restart",
   "start over": "restart",
   "play again": "restart",
   mute: "mute",
   unmute: "unmute",
+  "un mute": "unmute",
   "sound on": "unmute",
   "sound off": "mute",
 };
@@ -44,6 +46,18 @@ const COMMANDS_HI: Record<string, string> = {
   "आवाज़ चालू": "unmute",
 };
 
+const HINDI_CHAR_REGEX = /[\u0900-\u097F]/;
+
+const normalizeTranscript = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^\w\s\u0900-\u097F]/g, " ")
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const escapeForRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export function useVoiceCommands(
   handlers: VoiceCommandHandlers,
   language: string = "en"
@@ -51,17 +65,25 @@ export function useVoiceCommands(
   const [isListening, setIsListening] = useState(false);
   const [lastCommand, setLastCommand] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
+  const lastCommandTimeoutRef = useRef<number | null>(null);
   const isSupported = typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
 
   const handlersRef = useRef(handlers);
   handlersRef.current = handlers;
 
   const processTranscript = useCallback((transcript: string) => {
-    const lower = transcript.toLowerCase().trim();
+    const normalizedTranscript = normalizeTranscript(transcript);
     const commands = language === "hi" ? { ...COMMANDS_HI, ...COMMANDS_EN } : COMMANDS_EN;
+    const sortedCommands = Object.entries(commands).sort(([firstPhrase], [secondPhrase]) => secondPhrase.length - firstPhrase.length);
 
-    for (const [phrase, action] of Object.entries(commands)) {
-      if (lower.includes(phrase)) {
+    for (const [phrase, action] of sortedCommands) {
+      const normalizedPhrase = normalizeTranscript(phrase);
+      const isHindiPhrase = HINDI_CHAR_REGEX.test(normalizedPhrase);
+      const hasMatch = isHindiPhrase
+        ? normalizedTranscript.includes(normalizedPhrase)
+        : new RegExp(`(^|\\s)${escapeForRegex(normalizedPhrase)}(?=\\s|$)`).test(normalizedTranscript);
+
+      if (hasMatch) {
         setLastCommand(phrase);
         switch (action) {
           case "play": handlersRef.current.onPlay?.(); break;
@@ -70,8 +92,16 @@ export function useVoiceCommands(
           case "mute": handlersRef.current.onMute?.(); break;
           case "unmute": handlersRef.current.onUnmute?.(); break;
         }
-        // Clear last command after 2s
-        setTimeout(() => setLastCommand(null), 2000);
+
+        if (lastCommandTimeoutRef.current) {
+          window.clearTimeout(lastCommandTimeoutRef.current);
+        }
+
+        lastCommandTimeoutRef.current = window.setTimeout(() => {
+          setLastCommand(null);
+          lastCommandTimeoutRef.current = null;
+        }, 2000);
+
         return;
       }
     }
@@ -133,6 +163,10 @@ export function useVoiceCommands(
 
   useEffect(() => {
     return () => {
+      if (lastCommandTimeoutRef.current) {
+        window.clearTimeout(lastCommandTimeoutRef.current);
+      }
+
       if (recognitionRef.current) {
         recognitionRef.current.stop();
         recognitionRef.current = null;
