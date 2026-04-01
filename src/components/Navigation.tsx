@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Home, Sparkles, FlaskConical, Languages } from "lucide-react";
+import { BookOpen, Home, Sparkles, FlaskConical, Languages, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
