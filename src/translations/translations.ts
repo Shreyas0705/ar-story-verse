@@ -13,6 +13,7 @@ export const translations: Translations = {
       stories: "Stories",
       research: "Research",
       arDemo: "AR Demo",
+      create: "Create",
       brandName: "AR Storytelling",
     },
     home: {
