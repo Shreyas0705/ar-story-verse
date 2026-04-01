@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import Stories from "./pages/Stories";
 import AR from "./pages/AR";
 import Research from "./pages/Research";
+import CreateStory from "./pages/CreateStory";
+import ARPreview from "./pages/ARPreview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +25,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/stories" element={<Stories />} />
             <Route path="/ar" element={<AR />} />
+            <Route path="/create" element={<CreateStory />} />
+            <Route path="/ar-preview" element={<ARPreview />} />
             <Route path="/research" element={<Research />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

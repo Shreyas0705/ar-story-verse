@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Home, Sparkles, FlaskConical, Languages } from "lucide-react";
+import { BookOpen, Home, Sparkles, FlaskConical, Languages, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -40,6 +40,17 @@ const Navigation = () => {
               <Link to="/stories" className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
                 <span className="hidden sm:inline">{t("nav.stories")}</span>
+              </Link>
+            </Button>
+
+            <Button
+              variant={isActive("/create") ? "default" : "ghost"}
+              size="sm"
+              asChild
+            >
+              <Link to="/create" className="flex items-center gap-2">
+                <PenTool className="w-4 h-4" />
+                <span className="hidden sm:inline">{t("nav.create") || "Create"}</span>
               </Link>
             </Button>
 

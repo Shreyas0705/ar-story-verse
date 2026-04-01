@@ -13,6 +13,7 @@ export const translations: Translations = {
       stories: "Stories",
       research: "Research",
       arDemo: "AR Demo",
+      create: "Create",
       brandName: "AR Storytelling",
     },
     home: {
@@ -133,6 +134,7 @@ export const translations: Translations = {
       stories: "कहानियाँ",
       research: "शोध",
       arDemo: "एआर डेमो",
+      create: "बनाएं",
       brandName: "एआर स्टोरीटेलिंग",
     },
     home: {
