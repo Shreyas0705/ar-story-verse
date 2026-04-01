@@ -44,6 +44,17 @@ const Navigation = () => {
             </Button>
 
             <Button
+              variant={isActive("/create") ? "default" : "ghost"}
+              size="sm"
+              asChild
+            >
+              <Link to="/create" className="flex items-center gap-2">
+                <PenTool className="w-4 h-4" />
+                <span className="hidden sm:inline">{t("nav.create") || "Create"}</span>
+              </Link>
+            </Button>
+
+            <Button
               variant={isActive("/research") ? "default" : "ghost"}
               size="sm"
               asChild
