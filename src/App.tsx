@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import Stories from "./pages/Stories";
 import AR from "./pages/AR";
 import Research from "./pages/Research";
+import CreateStory from "./pages/CreateStory";
+import ARPreview from "./pages/ARPreview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
