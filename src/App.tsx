@@ -25,6 +25,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/stories" element={<Stories />} />
             <Route path="/ar" element={<AR />} />
+            <Route path="/create" element={<CreateStory />} />
+            <Route path="/ar-preview" element={<ARPreview />} />
             <Route path="/research" element={<Research />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
