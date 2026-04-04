@@ -1,59 +1,367 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft, RotateCcw, Play, Pause, Volume2, VolumeX,
-  ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Move
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Move,
+  Pause,
+  Play,
+  RotateCcw,
+  Volume2,
+  VolumeX,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 import { useStoryPlayer } from "@/hooks/useStoryPlayer";
 import type { GeneratedStory } from "@/hooks/useStoryGeneration";
 
-const ARPreview = () => {
-  const location = useLocation();
-  const story = location.state?.story as GeneratedStory | undefined;
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [cameraReady, setCameraReady] = useState(false);
-  const [cameraError, setCameraError] = useState(false);
+const STORY_STORAGE_KEY = "ar-story-preview";
+
+const readStoredStory = (): GeneratedStory | undefined => {
+  if (typeof window === "undefined") return undefined;
+
+  try {
+    const rawStory = window.sessionStorage.getItem(STORY_STORAGE_KEY);
+    return rawStory ? (JSON.parse(rawStory) as GeneratedStory) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const SceneFallback = ({ index, caption }: { index: number; caption?: string }) => {
+  const gradients = [
+    "from-primary/30 via-accent/15 to-secondary/25",
+    "from-accent/25 via-primary/10 to-secondary/20",
+    "from-secondary/30 via-primary/10 to-accent/20",
+  ];
+
+  return (
+    <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${gradients[index % gradients.length]}`}>
+      <div className="flex max-w-xs flex-col items-center gap-3 px-6 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-border bg-background/70 text-3xl shadow-sm">
+          ✨
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-foreground">Scene preview</p>
+          <p className="mt-1 text-xs text-muted-foreground">{caption || "Your generated scene will appear here."}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface ARExperienceProps {
+  story: GeneratedStory;
+  cameraError: string | null;
+  cameraReady: boolean;
+  videoRef: React.RefObject<HTMLVideoElement>;
+}
+
+const ARExperience = ({ story, cameraError, cameraReady, videoRef }: ARExperienceProps) => {
+  const {
+    currentScene,
+    setCurrentScene,
+    isPlaying,
+    isNarrating,
+    play,
+    pause,
+    restart,
+    narrate,
+    stopNarration,
+  } = useStoryPlayer(story.scenes, story.fullText);
+
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
 
-  // Camera setup
+  const scene = story.scenes[currentScene];
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [currentScene, scene?.imageUrl]);
+
+  const handleDragStart = (event: React.PointerEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    dragStart.current = {
+      x: event.clientX - position.x,
+      y: event.clientY - position.y,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleDragMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+
+    setPosition({
+      x: event.clientX - dragStart.current.x,
+      y: event.clientY - dragStart.current.y,
+    });
+  };
+
+  const handleDragEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+
+  const goToPreviousScene = () => {
+    setCurrentScene((previous) => Math.max(0, previous - 1));
+  };
+
+  const goToNextScene = () => {
+    setCurrentScene((previous) => Math.min(story.scenes.length - 1, previous + 1));
+  };
+
+  const resetCardPosition = () => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-muted/40 to-background" />
+      <video
+        ref={videoRef}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${cameraError ? "opacity-0" : "opacity-100"}`}
+        playsInline
+        muted
+        autoPlay
+      />
+      <div className="absolute inset-0 bg-background/30" />
+
+      {!cameraReady && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-sm">
+          <div className="text-center">
+            <div className="mx-auto mb-3 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <p className="text-sm text-muted-foreground">Opening camera for AR preview...</p>
+          </div>
+        </div>
+      )}
+
+      <div className="absolute inset-x-0 top-0 z-30 p-3">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-2xl border border-border bg-background/80 px-3 py-3 shadow-sm backdrop-blur-xl">
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/create" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Link>
+          </Button>
+
+          <div className="min-w-0 flex-1 text-center">
+            <p className="truncate text-sm font-semibold text-primary">{story.title}</p>
+            <p className="text-xs text-muted-foreground">
+              Scene {currentScene + 1} / {story.scenes.length}
+            </p>
+          </div>
+
+          <Button variant="outline" size="icon" onClick={restart}>
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {cameraError && (
+        <div className="absolute inset-x-0 top-24 z-30 px-4">
+          <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-card/90 px-4 py-3 text-center text-sm text-muted-foreground shadow-sm backdrop-blur-xl">
+            {cameraError} You can still explore the story card below.
+          </div>
+        </div>
+      )}
+
+      <div className="absolute inset-0 z-20 flex items-center justify-center px-4 pb-32 pt-28">
+        <div
+          className="relative w-full max-w-[30rem]"
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+            transition: isDragging ? "none" : "transform 200ms ease-out",
+          }}
+        >
+          <div
+            className="mb-3 flex touch-none items-center justify-between rounded-2xl border border-border bg-background/80 px-4 py-2 text-xs text-muted-foreground shadow-sm backdrop-blur-xl"
+            onPointerDown={handleDragStart}
+            onPointerMove={handleDragMove}
+            onPointerUp={handleDragEnd}
+            onPointerCancel={handleDragEnd}
+          >
+            <div className="flex items-center gap-2">
+              <Move className="h-3.5 w-3.5" />
+              Drag to position
+            </div>
+            <Button variant="ghost" size="sm" onClick={resetCardPosition}>
+              Center
+            </Button>
+          </div>
+
+          <div
+            className="overflow-hidden rounded-[28px] border border-border bg-card/95 shadow-[0_24px_80px_-32px_hsl(var(--foreground)/0.55)] backdrop-blur-xl"
+            style={{ boxShadow: "0 0 0 1px hsl(var(--border) / 0.8), 0 24px 80px -32px hsl(var(--foreground) / 0.55)" }}
+          >
+            <button
+              type="button"
+              onClick={goToNextScene}
+              className="relative block aspect-video w-full overflow-hidden bg-muted text-left"
+            >
+              {scene?.imageUrl && !imageFailed ? (
+                <img
+                  src={scene.imageUrl}
+                  alt={scene.caption}
+                  className="h-full w-full object-cover"
+                  draggable={false}
+                  onError={() => setImageFailed(true)}
+                />
+              ) : (
+                <SceneFallback index={currentScene} caption={scene?.caption} />
+              )}
+
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 via-background/45 to-transparent px-4 pb-4 pt-10">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-primary">Tap image to advance</p>
+                <p className="mt-1 text-lg font-semibold text-foreground">{scene?.caption}</p>
+              </div>
+            </button>
+
+            <div className="space-y-4 p-4">
+              <p className="text-sm leading-relaxed text-foreground">{scene?.text}</p>
+
+              <div className="flex flex-wrap gap-2">
+                {story.scenes.map((storyScene, index) => (
+                  <button
+                    key={`${storyScene.sceneNumber}-${index}`}
+                    type="button"
+                    onClick={() => setCurrentScene(index)}
+                    className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                      index === currentScene
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-background text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+                <div className="rounded-2xl border border-border bg-background px-3 py-2">Tap the image for the next scene</div>
+                <div className="rounded-2xl border border-border bg-background px-3 py-2">Use the drag bar to place the story in view</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute inset-x-0 bottom-0 z-30 p-3">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-background/85 p-3 shadow-sm backdrop-blur-xl">
+          <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-300"
+              style={{ width: `${((currentScene + 1) / story.scenes.length) * 100}%` }}
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button variant="outline" size="icon" onClick={goToPreviousScene} disabled={currentScene === 0}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button variant="secondary" size="icon" onClick={isPlaying ? pause : play}>
+              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
+            <Button variant="outline" size="icon" onClick={goToNextScene} disabled={currentScene === story.scenes.length - 1}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button variant={isNarrating ? "secondary" : "outline"} size="sm" onClick={isNarrating ? stopNarration : narrate}>
+              {isNarrating ? <VolumeX className="mr-2 h-4 w-4" /> : <Volume2 className="mr-2 h-4 w-4" />}
+              {isNarrating ? "Stop" : "Narrate"}
+            </Button>
+            <Button variant="outline" size="icon" onClick={() => setScale((value) => Math.max(0.8, value - 0.15))}>
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={() => setScale((value) => Math.min(1.8, value + 0.15))}>
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ARPreview = () => {
+  const location = useLocation();
+  const incomingStory = location.state?.story as GeneratedStory | undefined;
+  const [storedStory, setStoredStory] = useState<GeneratedStory | undefined>(() => readStoredStory());
+  const [cameraReady, setCameraReady] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const story = incomingStory ?? storedStory;
+
+  useEffect(() => {
+    if (!incomingStory || typeof window === "undefined") return;
+
+    window.sessionStorage.setItem(STORY_STORAGE_KEY, JSON.stringify(incomingStory));
+    setStoredStory(incomingStory);
+  }, [incomingStory]);
+
   useEffect(() => {
     let stream: MediaStream | null = null;
+    let isCancelled = false;
+
     const startCamera = async () => {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setCameraReady(true);
+        setCameraError("Camera access is not supported on this device.");
+        return;
+      }
+
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
         });
+
+        if (isCancelled) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-          setCameraReady(true);
+          await videoRef.current.play().catch(() => undefined);
         }
+
+        setCameraError(null);
+        setCameraReady(true);
       } catch {
-        setCameraError(true);
-        setCameraReady(true); // still show content with fallback bg
+        setCameraReady(true);
+        setCameraError("Camera unavailable right now.");
       }
     };
+
     startCamera();
+
     return () => {
-      stream?.getTracks().forEach((t) => t.stop());
+      isCancelled = true;
+      stream?.getTracks().forEach((track) => track.stop());
     };
   }, []);
 
   if (!story) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <div className="pt-24 px-4 flex flex-col items-center justify-center min-h-[60vh] gap-4">
-          <p className="text-muted-foreground text-lg">No story to display in AR</p>
+      <div className="min-h-screen bg-background px-4 py-24">
+        <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center gap-4 rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
+          <p className="text-lg font-semibold text-foreground">No story is loaded for AR preview.</p>
+          <p className="text-sm text-muted-foreground">Generate a story first, then open the AR preview from the story player.</p>
           <Button asChild>
             <Link to="/create" className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Create a Story
+              <ArrowLeft className="h-4 w-4" />
+              Back to Create
             </Link>
           </Button>
         </div>
@@ -61,226 +369,7 @@ const ARPreview = () => {
     );
   }
 
-  return <ARScene story={story} videoRef={videoRef} cameraReady={cameraReady} cameraError={cameraError} scale={scale} setScale={setScale} position={position} setPosition={setPosition} isDragging={isDragging} setIsDragging={setIsDragging} dragStart={dragStart} />;
-};
-
-interface ARSceneProps {
-  story: GeneratedStory;
-  videoRef: React.RefObject<HTMLVideoElement>;
-  cameraReady: boolean;
-  cameraError: boolean;
-  scale: number;
-  setScale: (s: number) => void;
-  position: { x: number; y: number };
-  setPosition: (p: { x: number; y: number }) => void;
-  isDragging: boolean;
-  setIsDragging: (d: boolean) => void;
-  dragStart: React.MutableRefObject<{ x: number; y: number }>;
-}
-
-const ScenePlaceholder = ({ index }: { index: number }) => {
-  const gradients = [
-    "from-purple-500/40 to-blue-500/40",
-    "from-blue-500/40 to-green-500/40",
-    "from-green-500/40 to-yellow-500/40",
-    "from-yellow-500/40 to-red-500/40",
-    "from-red-500/40 to-purple-500/40",
-  ];
-  return (
-    <div className={`w-full h-full bg-gradient-to-br ${gradients[index % gradients.length]} flex items-center justify-center`}>
-      <span className="text-5xl">🎨</span>
-    </div>
-  );
-};
-
-const ARScene = ({ story, videoRef, cameraReady, cameraError, scale, setScale, position, setPosition, isDragging, setIsDragging, dragStart }: ARSceneProps) => {
-  const {
-    currentScene, setCurrentScene, isPlaying, isNarrating,
-    play, pause, restart, narrate, stopNarration,
-  } = useStoryPlayer(story.scenes, story.fullText);
-
-  const scene = story.scenes[currentScene];
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    setIsDragging(true);
-    dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
-  };
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
-    setPosition({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y });
-  };
-  const handlePointerUp = () => setIsDragging(false);
-
-  return (
-    <div className="fixed inset-0 overflow-hidden bg-black" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}>
-      {/* Camera Feed Background */}
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover"
-        playsInline
-        muted
-        autoPlay
-      />
-      {/* Fallback background if no camera */}
-      {cameraError && (
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
-      )}
-
-      {/* Loading overlay */}
-      {!cameraReady && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black">
-          <div className="text-center">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-white text-sm">Initializing AR Camera...</p>
-          </div>
-        </div>
-      )}
-
-      {/* Top Controls */}
-      <div className="absolute top-0 left-0 right-0 z-40 p-3 safe-area-top">
-        <div className="flex items-center justify-between bg-black/60 backdrop-blur-md rounded-xl p-3">
-          <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/20">
-            <Link to="/create" className="flex items-center gap-1.5">
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-xs">Back</span>
-            </Link>
-          </Button>
-          <div className="text-center flex-1 mx-2">
-            <p className="text-xs font-semibold text-primary truncate">{story.title}</p>
-            <p className="text-[10px] text-white/60">Scene {currentScene + 1}/{story.scenes.length}</p>
-          </div>
-          <Button variant="ghost" size="sm" onClick={restart} className="text-white hover:bg-white/20">
-            <RotateCcw className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Floating Story Card - draggable & scalable */}
-      <div
-        ref={containerRef}
-        className="absolute z-30 cursor-grab active:cursor-grabbing"
-        style={{
-          left: `calc(50% + ${position.x}px)`,
-          top: `calc(40% + ${position.y}px)`,
-          transform: `translate(-50%, -50%) scale(${scale})`,
-          transition: isDragging ? "none" : "transform 0.3s ease",
-          width: "min(85vw, 420px)",
-        }}
-        onPointerDown={handlePointerDown}
-      >
-        {/* Glowing border effect */}
-        <div className="relative rounded-2xl overflow-hidden shadow-2xl" style={{ boxShadow: "0 0 30px rgba(139, 92, 246, 0.3), 0 0 60px rgba(139, 92, 246, 0.1)" }}>
-          {/* Scene Image */}
-          <div className="aspect-video bg-black/40 relative overflow-hidden">
-            {scene?.imageUrl ? (
-              <img
-                src={scene.imageUrl}
-                alt={scene.caption}
-                className="w-full h-full object-cover transition-all duration-700"
-                draggable={false}
-              />
-            ) : (
-              <ScenePlaceholder index={currentScene} />
-            )}
-            {/* Scene dots */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-              {story.scenes.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={(e) => { e.stopPropagation(); setCurrentScene(i); }}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    i === currentScene ? "bg-white scale-125 shadow-lg" : "bg-white/40"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Caption & Text */}
-          <div className="bg-black/80 backdrop-blur-md p-3">
-            <p className="text-primary text-xs font-semibold mb-1">{scene?.caption}</p>
-            <p className="text-white/90 text-xs leading-relaxed">{scene?.text}</p>
-          </div>
-        </div>
-
-        {/* Decorative floating particles */}
-        <div className="absolute -top-3 -right-3 w-4 h-4 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: "0s", animationDuration: "2s" }} />
-        <div className="absolute -bottom-2 -left-2 w-3 h-3 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: "0.5s", animationDuration: "2.5s" }} />
-        <div className="absolute top-1/2 -right-4 w-2 h-2 bg-yellow-400/60 rounded-full animate-bounce" style={{ animationDelay: "1s", animationDuration: "3s" }} />
-      </div>
-
-      {/* Bottom Controls */}
-      <div className="absolute bottom-0 left-0 right-0 z-40 p-3 safe-area-bottom">
-        <div className="bg-black/60 backdrop-blur-md rounded-xl p-3">
-          {/* Playback controls */}
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Button
-              variant="ghost" size="icon"
-              onClick={() => setCurrentScene(Math.max(0, currentScene - 1))}
-              disabled={currentScene === 0}
-              className="text-white hover:bg-white/20 h-8 w-8"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-
-            <Button
-              variant="ghost" size="icon"
-              onClick={isPlaying ? pause : play}
-              className="text-white hover:bg-white/20 h-10 w-10 rounded-full border border-white/30"
-            >
-              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-            </Button>
-
-            <Button
-              variant="ghost" size="icon"
-              onClick={() => setCurrentScene(Math.min(story.scenes.length - 1, currentScene + 1))}
-              disabled={currentScene === story.scenes.length - 1}
-              className="text-white hover:bg-white/20 h-8 w-8"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Secondary controls */}
-          <div className="flex items-center justify-center gap-1.5">
-            <Button
-              variant="ghost" size="sm"
-              onClick={isNarrating ? stopNarration : narrate}
-              className={`text-white hover:bg-white/20 text-[10px] gap-1 h-7 px-2 ${isNarrating ? "bg-primary/40" : ""}`}
-            >
-              {isNarrating ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-              {isNarrating ? "Stop" : "Narrate"}
-            </Button>
-
-            <Button
-              variant="ghost" size="sm"
-              onClick={() => setScale(Math.min(2, scale + 0.2))}
-              className="text-white hover:bg-white/20 h-7 w-7 p-0"
-            >
-              <ZoomIn className="w-3 h-3" />
-            </Button>
-
-            <Button
-              variant="ghost" size="sm"
-              onClick={() => setScale(Math.max(0.5, scale - 0.2))}
-              className="text-white hover:bg-white/20 h-7 w-7 p-0"
-            >
-              <ZoomOut className="w-3 h-3" />
-            </Button>
-
-            <Button
-              variant="ghost" size="sm"
-              onClick={() => { setPosition({ x: 0, y: 0 }); setScale(1); }}
-              className="text-white hover:bg-white/20 h-7 w-7 p-0"
-            >
-              <Move className="w-3 h-3" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <ARExperience story={story} cameraError={cameraError} cameraReady={cameraReady} videoRef={videoRef} />;
 };
 
 export default ARPreview;
