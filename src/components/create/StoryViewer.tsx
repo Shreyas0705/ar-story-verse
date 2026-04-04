@@ -39,6 +39,11 @@ const StoryViewer = ({ story, onRegenerate }: StoryViewerProps) => {
 
   const scene = story.scenes[currentScene];
 
+  const handleOpenARPreview = () => {
+    if (typeof window === "undefined") return;
+    window.sessionStorage.setItem("ar-story-preview", JSON.stringify(story));
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       {/* Title */}
@@ -116,7 +121,7 @@ const StoryViewer = ({ story, onRegenerate }: StoryViewerProps) => {
         </Button>
 
         <Button variant="secondary" size="sm" asChild className="gap-2 rounded-xl">
-          <Link to="/ar-preview" state={{ story }}>
+          <Link to="/ar-preview" state={{ story }} onClick={handleOpenARPreview}>
             <Sparkles className="w-4 h-4" />
             View in AR
           </Link>
