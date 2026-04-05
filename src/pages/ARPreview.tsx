@@ -301,7 +301,11 @@ const ARPreview = () => {
   useEffect(() => {
     if (!incomingStory || typeof window === "undefined") return;
 
-    window.sessionStorage.setItem(STORY_STORAGE_KEY, JSON.stringify(incomingStory));
+    try {
+      window.sessionStorage.setItem(STORY_STORAGE_KEY, JSON.stringify(incomingStory));
+    } catch {
+      // sessionStorage may be full due to large base64 images — ignore
+    }
     setStoredStory(incomingStory);
   }, [incomingStory]);
 
