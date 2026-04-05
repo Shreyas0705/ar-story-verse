@@ -41,7 +41,21 @@ const StoryViewer = ({ story, onRegenerate }: StoryViewerProps) => {
 
   const handleOpenARPreview = () => {
     if (typeof window === "undefined") return;
-    window.sessionStorage.setItem("ar-story-preview", JSON.stringify(story));
+    try {
+      // Try storing full story first
+      window.sessionStorage.setItem("ar-story-preview", JSON.stringify(story));
+    } catch {
+      // If too large (base64 images), store without image data
+      const lightStory = {
+        ...story,
+        scenes: story.scenes.map(s => ({ ...s, imageUrl: undefined })),
+      };
+      try {
+        window.sessionStorage.setItem("ar-story-preview", JSON.stringify(lightStory));
+      } catch {
+        // ignore
+      }
+    }
   };
 
   return (
