@@ -7,6 +7,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import QuizModal from "@/components/quiz/QuizModal";
 import { getQuizByVideoUrl, getQuizByStoryId } from "@/data/quizData";
 import { useVoiceCommands } from "@/hooks/useVoiceCommands";
+import { useGazeSelect } from "@/hooks/useGazeSelect";
+import GazeReticle from "@/components/ar/GazeReticle";
+import { Switch } from "@/components/ui/switch";
 
 declare global {
   namespace JSX {
@@ -35,6 +38,7 @@ const AR = () => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [showQuiz, setShowQuiz] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const gaze = useGazeSelect();
 
   const playVideo = useCallback(() => {
     const video = document.getElementById('video-asset') as HTMLVideoElement;
@@ -140,6 +144,21 @@ const AR = () => {
   return (
     <div className="relative min-h-screen bg-background">
       <Navigation />
+
+      {/* Gaze reticle */}
+      {gaze.enabled && (
+        <GazeReticle dwellProgress={gaze.dwellProgress} gazeLabel={gaze.gazeLabel} offset={gaze.reticleOffset} />
+      )}
+
+      {/* Motion denied prompt */}
+      {gaze.enabled && gaze.motionDenied && (
+        <div className="fixed inset-x-0 top-24 z-[60] px-4">
+          <div className="mx-auto flex max-w-sm items-center justify-between rounded-2xl border border-border bg-card/90 px-4 py-3 text-sm shadow-sm backdrop-blur-xl">
+            <span className="text-muted-foreground">Motion access denied</span>
+            <Button size="sm" variant="outline" onClick={gaze.requestMotion}>Enable Motion</Button>
+          </div>
+        </div>
+      )}
       
       {/* Audio */}
       <audio 
@@ -166,6 +185,11 @@ const AR = () => {
             </Button>
 
             <div className="flex items-center gap-2">
+              <label htmlFor="ar-headset-toggle" className="text-xs text-muted-foreground">Headset</label>
+              <Switch id="ar-headset-toggle" checked={gaze.enabled} onCheckedChange={gaze.toggle} />
+            </div>
+
+            <div className="flex items-center gap-2">
               <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
                 <Info className="w-4 h-4 text-primary" />
                 <span className="text-sm text-primary">{t("ar.moveDevice")}</span>
@@ -178,6 +202,8 @@ const AR = () => {
                     size="sm"
                     onClick={togglePlayPause}
                     className="gap-2"
+                    data-gaze
+                    data-gaze-label={isPlaying ? "Pause" : "Play"}
                   >
                     {isPlaying ? (
                       <>
@@ -196,6 +222,8 @@ const AR = () => {
                     size="sm"
                     onClick={restartVideo}
                     className="gap-2"
+                    data-gaze
+                    data-gaze-label="Restart"
                   >
                     <RotateCcw className="w-4 h-4" />
                     <span className="hidden sm:inline">{t("ar.restart")}</span>
@@ -207,6 +235,8 @@ const AR = () => {
                 variant="outline"
                 size="sm"
                 onClick={toggleMute}
+                data-gaze
+                data-gaze-label={isMuted ? "Unmute" : "Mute"}
               >
                 {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </Button>
@@ -218,10 +248,18 @@ const AR = () => {
                 disabled={!isSupported}
                 className={`gap-2 ${isListening ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : ""}`}
                 title={!isSupported ? "Voice commands not supported in this browser" : ""}
+                data-gaze
+                data-gaze-label={isListening ? "Mic Off" : "Mic On"}
               >
                 {isListening ? <Mic className="w-4 h-4 animate-pulse" /> : <MicOff className="w-4 h-4" />}
                 <span className="hidden sm:inline">{isListening ? t("ar.voiceOn") : t("ar.voiceOff")}</span>
               </Button>
+
+              {gaze.enabled && (
+                <Button variant="outline" size="sm" onClick={gaze.recenter} data-gaze data-gaze-label="Recenter">
+                  Recenter
+                </Button>
+              )}
             </div>
 
             {/* Voice command feedback */}

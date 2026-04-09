@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import StoryInput from "@/components/create/StoryInput";
 import GenerationProgress from "@/components/create/GenerationProgress";
@@ -6,8 +6,11 @@ import StoryViewer from "@/components/create/StoryViewer";
 import { useStoryGeneration } from "@/hooks/useStoryGeneration";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
+import AiNotice from "@/components/create/AiNotice";
+import { supabase } from "@/integrations/supabase/client";
 
 const CreateStory = () => {
+  const [aiUnavailable, setAiUnavailable] = useState(false);
   const [prompt, setPrompt] = useState("");
   const { story, step, error, imageProgress, generateStory, reset } = useStoryGeneration();
 
@@ -24,11 +27,19 @@ const CreateStory = () => {
     }
   };
 
+  // Check AI availability on mount
+  useEffect(() => {
+    supabase.functions.invoke("generate-story", { body: { prompt: "__ping__" } }).then(({ error }) => {
+      if (error) setAiUnavailable(true);
+    }).catch(() => setAiUnavailable(true));
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="pt-24 px-4 pb-12">
         <div className="container mx-auto">
+          <AiNotice visible={aiUnavailable && step === "idle"} />
           {/* Idle - Show input */}
           {step === "idle" && (
             <StoryInput
