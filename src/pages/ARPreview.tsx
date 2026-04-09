@@ -15,6 +15,9 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { useStoryPlayer } from "@/hooks/useStoryPlayer";
+import { useGazeSelect } from "@/hooks/useGazeSelect";
+import GazeReticle from "@/components/ar/GazeReticle";
+import { Switch } from "@/components/ui/switch";
 import type { GeneratedStory } from "@/hooks/useStoryGeneration";
 
 const STORY_STORAGE_KEY = "ar-story-preview";
@@ -71,6 +74,8 @@ const ARExperience = ({ story, cameraError, cameraReady, videoRef }: ARExperienc
     narrate,
     stopNarration,
   } = useStoryPlayer(story.scenes, story.fullText);
+
+  const gaze = useGazeSelect();
 
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -133,6 +138,21 @@ const ARExperience = ({ story, cameraError, cameraReady, videoRef }: ARExperienc
       />
       <div className="absolute inset-0 bg-background/30" />
 
+      {/* Gaze reticle */}
+      {gaze.enabled && (
+        <GazeReticle dwellProgress={gaze.dwellProgress} gazeLabel={gaze.gazeLabel} offset={gaze.reticleOffset} />
+      )}
+
+      {/* Motion denied prompt */}
+      {gaze.enabled && gaze.motionDenied && (
+        <div className="absolute inset-x-0 top-24 z-40 px-4">
+          <div className="mx-auto flex max-w-sm items-center justify-between rounded-2xl border border-border bg-card/90 px-4 py-3 text-sm shadow-sm backdrop-blur-xl">
+            <span className="text-muted-foreground">Motion access denied</span>
+            <Button size="sm" variant="outline" onClick={gaze.requestMotion}>Enable Motion</Button>
+          </div>
+        </div>
+      )}
+
       {!cameraReady && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-sm">
           <div className="text-center">
@@ -158,7 +178,12 @@ const ARExperience = ({ story, cameraError, cameraReady, videoRef }: ARExperienc
             </p>
           </div>
 
-          <Button variant="outline" size="icon" onClick={restart}>
+          <div className="flex items-center gap-2">
+            <label htmlFor="headset-toggle" className="text-xs text-muted-foreground">Headset</label>
+            <Switch id="headset-toggle" checked={gaze.enabled} onCheckedChange={gaze.toggle} />
+          </div>
+
+          <Button variant="outline" size="icon" onClick={restart} data-gaze data-gaze-label="Restart">
             <RotateCcw className="h-4 w-4" />
           </Button>
         </div>
@@ -262,25 +287,30 @@ const ARExperience = ({ story, cameraError, cameraReady, videoRef }: ARExperienc
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
-            <Button variant="outline" size="icon" onClick={goToPreviousScene} disabled={currentScene === 0}>
+            <Button variant="outline" size="icon" onClick={goToPreviousScene} disabled={currentScene === 0} data-gaze data-gaze-label="Previous">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="secondary" size="icon" onClick={isPlaying ? pause : play}>
+            <Button variant="secondary" size="icon" onClick={isPlaying ? pause : play} data-gaze data-gaze-label={isPlaying ? "Pause" : "Play"}>
               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
-            <Button variant="outline" size="icon" onClick={goToNextScene} disabled={currentScene === story.scenes.length - 1}>
+            <Button variant="outline" size="icon" onClick={goToNextScene} disabled={currentScene === story.scenes.length - 1} data-gaze data-gaze-label="Next">
               <ChevronRight className="h-4 w-4" />
             </Button>
-            <Button variant={isNarrating ? "secondary" : "outline"} size="sm" onClick={isNarrating ? stopNarration : narrate}>
+            <Button variant={isNarrating ? "secondary" : "outline"} size="sm" onClick={isNarrating ? stopNarration : narrate} data-gaze data-gaze-label={isNarrating ? "Stop" : "Narrate"}>
               {isNarrating ? <VolumeX className="mr-2 h-4 w-4" /> : <Volume2 className="mr-2 h-4 w-4" />}
               {isNarrating ? "Stop" : "Narrate"}
             </Button>
-            <Button variant="outline" size="icon" onClick={() => setScale((value) => Math.max(0.8, value - 0.15))}>
+            <Button variant="outline" size="icon" onClick={() => setScale((value) => Math.max(0.8, value - 0.15))} data-gaze data-gaze-label="Zoom Out">
               <ZoomOut className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => setScale((value) => Math.min(1.8, value + 0.15))}>
+            <Button variant="outline" size="icon" onClick={() => setScale((value) => Math.min(1.8, value + 0.15))} data-gaze data-gaze-label="Zoom In">
               <ZoomIn className="h-4 w-4" />
             </Button>
+            {gaze.enabled && (
+              <Button variant="outline" size="sm" onClick={gaze.recenter} data-gaze data-gaze-label="Recenter">
+                Recenter
+              </Button>
+            )}
           </div>
         </div>
       </div>
