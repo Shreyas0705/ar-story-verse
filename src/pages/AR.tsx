@@ -4,7 +4,7 @@ import { Home, Volume2, VolumeX, Info, Sparkles, Play, Pause, Trophy, RotateCcw,
 import { Link, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
-import QuizModal from "@/components/quiz/QuizModal";
+import ARQuizOverlay from "@/components/ar/ARQuizOverlay";
 import { getQuizByVideoUrl, getQuizByStoryId } from "@/data/quizData";
 import { useVoiceCommands } from "@/hooks/useVoiceCommands";
 import { useGazeSelect } from "@/hooks/useGazeSelect";
