@@ -290,6 +290,15 @@ const AR = () => {
             </div>
           ) : (
             <div className="relative rounded-3xl overflow-hidden border border-border animate-fade-in" style={{ height: '70vh', zIndex: 1 }}>
+              {/* AR Quiz Overlay — rendered inside the AR scene container */}
+              {quiz && (
+                <ARQuizOverlay
+                  quiz={quiz}
+                  isOpen={showQuiz}
+                  onClose={() => setShowQuiz(false)}
+                />
+              )}
+
               {/* Hidden video element for AR texture */}
               {videoUrl && (
                 <video 
