@@ -482,14 +482,7 @@ const AR = () => {
         </div>
       </div>
 
-      {/* Quiz Modal */}
-      {quiz && (
-        <QuizModal
-          quiz={quiz}
-          isOpen={showQuiz}
-          onClose={() => setShowQuiz(false)}
-        />
-      )}
+      {/* Quiz is now rendered inside the AR scene container above */}
     </div>
   );
 };
