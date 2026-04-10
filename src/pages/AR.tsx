@@ -4,7 +4,7 @@ import { Home, Volume2, VolumeX, Info, Sparkles, Play, Pause, Trophy, RotateCcw,
 import { Link, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
-import QuizModal from "@/components/quiz/QuizModal";
+import ARQuizOverlay from "@/components/ar/ARQuizOverlay";
 import { getQuizByVideoUrl, getQuizByStoryId } from "@/data/quizData";
 import { useVoiceCommands } from "@/hooks/useVoiceCommands";
 import { useGazeSelect } from "@/hooks/useGazeSelect";
@@ -290,6 +290,15 @@ const AR = () => {
             </div>
           ) : (
             <div className="relative rounded-3xl overflow-hidden border border-border animate-fade-in" style={{ height: '70vh', zIndex: 1 }}>
+              {/* AR Quiz Overlay — rendered inside the AR scene container */}
+              {quiz && (
+                <ARQuizOverlay
+                  quiz={quiz}
+                  isOpen={showQuiz}
+                  onClose={() => setShowQuiz(false)}
+                />
+              )}
+
               {/* Hidden video element for AR texture */}
               {videoUrl && (
                 <video 
@@ -473,14 +482,7 @@ const AR = () => {
         </div>
       </div>
 
-      {/* Quiz Modal */}
-      {quiz && (
-        <QuizModal
-          quiz={quiz}
-          isOpen={showQuiz}
-          onClose={() => setShowQuiz(false)}
-        />
-      )}
+      {/* Quiz is now rendered inside the AR scene container above */}
     </div>
   );
 };
